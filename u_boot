@@ -1,0 +1,25 @@
+从 arch/arm/cpu/armv7/start.S文件开始
+
+#include <asm-offsets.h>   
+#include <config.h>
+#include <asm/system.h>
+#include <linux/linkage.h>   //uboot 源码根目录的include文件夹
+#include <asm/armv7.h>  //    arch/arm/include 文件夹
+
+
+/*执行第一行代码*/
+reset:
+
+	b	save_boot_params              /* 保存一些启动数据 rk没有用到  Allow the board to save important registers */
+save_boot_params_ret:
+#ifdef CONFIG_ARMV7_LPAE
+/*
+* 检测是否支持虚拟化
+ * check for Hypervisor support
+ */
+	mrc	p15, 0, r0, c0, c1, 1		@ read ID_PFR1   /*读取CP15 协处理器寄存器数据    查询ARMV7架构手册得到该寄存器的功能，和读写CP15寄存器的具体汇编语句
+                                                                                                    https://zhuanlan.zhihu.com/p/362766531*/
+	and	r0, r0, #CPUID_ARM_VIRT_MASK	@ mask virtualization bits
+	cmp	r0, #(1 << CPUID_ARM_VIRT_SHIFT)
+	beq	switch_to_hypervisor
+
