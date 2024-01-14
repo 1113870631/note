@@ -1,0 +1,5 @@
+make --dry-run           只打印不执行make执行命令的过程
+make V=1                   打印详细执行信息
+make --debug
+make --trace
+make -p
